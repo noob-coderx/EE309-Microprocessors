@@ -1,0 +1,47 @@
+Library ieee;
+use ieee.std_logic_1164.all;
+library work;
+use work.Gates.all;
+
+entity Dec6 is 
+  port (IRin,PCin :in std_logic_vector( 15 downto 0);clock: in std_logic;
+        LMSM : in std_logic_vector(2 downto 0); 
+        Zero_flag: in std_logic; Carry_flag : in std_logic; 
+        Wr_rf: out std_logic
+        A3 : out std_logic_vector(2 downto 0));
+end entity Dec6 ;
+
+
+architecture Struct of Dec6 is
+
+  --signal y_31,y_30,y_21,y_20,y_11,y_10,y_01,y_00 : std_logic;
+signal PCstore,IRstore: std_logic_vector(15 downto 0);
+begin
+Str: process(IRin, PCin, LMSM, clock, Zero_flag, Carry_flag, Hazardout)
+	begin
+        if((Carry_flag = '0')  and ((IRin(15 downto 12) = "0001") or (IRin(15 downto 12) = "0010"))and (IRin(1 downto 0) = "10")) then 
+            Wr_rf <= '0';
+            A3 <= "111";   -- Dont care value
+        elsif((Zero_flag = '0') and ((IRin(15 downto 12) = "0001") or (IRin(15 downto 12) = "0010")) and (IRin(1 downto 0) = "01")) then
+            Wr_rf <= '0';
+            A3  <= "111";  -- Dont care value 
+        elsif(IRin(15 downto 12) = "0101" or IRin(15 downto 14) = "10") then
+            Wr_rf <= '0';
+            A3 <= "111";   -- Dont care value
+        elsif (IRin(15 downto 12) = "0001") or (IRin(15 downto 12) = "0010")  then
+            Wr_rf <= '1';
+            A3 <= IRin(5 downto 3);
+        elsif(IRin(15 downto 12) = "0011" or IRin(15 downto 14) = "11" or (IRin(15 downto 12) = "0100")) then
+            Wr_rf <= '1';
+            A3 <= IRin(11 downto 9);
+        elsif((IRin(15 downto 12) = "0000"))then
+            Wr_rf <= '1';
+            A3 <= IRin(8 downto 6);
+        elsif(IRin(15 downto 12) = "0110" and not IRin(7 downto 0) = "00000000")then   -- the code that the device gives for whether the LMSM unit has some ones left
+            Wr_rf <= '1';
+            A3 <= LMSM;
+        else 
+            WR_rf <= '0';
+            A3 <= "111";     -- Dont care values
+	end process Str;
+end Struct;

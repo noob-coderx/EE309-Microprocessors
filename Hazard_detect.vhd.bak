@@ -1,0 +1,76 @@
+library ieee;
+use ieee.std_logic_1164.all;
+use ieee.numeric_std.all;
+
+entity Hazard_detect is
+    port(
+		    IR_STAGE_3: in std_logic_vector(15 downto 0);S1I2, S2I2, DI3,DI4: in std_logic_vector(2 downto 0);
+			 NumS, carryflag, zeroflag: in std_logic;
+          HazardBitsA,HazardBitsB,stopbit : out std_logic_vector(1 downto 0);
+        );
+end entity Hazard_detect;
+
+architecture bhv of Hazard_detect is
+
+    begin
+        alu_proc: process(IR_STAGE_2, IR_STAGE_3, IR_STAGE_4, IR_STAGE_5)
+    begin
+        ---------------------------------------------------------
+		  if((IR_STAGE_3(15 downto 14) = "11") or (IR_STAGE_3(15 downto 12) = "1000" and Zeroflag = '1') or (IR_STAGE_3(15 downto 12) = "1001" and carryflag = '1') or (IR_STAGE_3(15 downto 12) = "1010" and (carryflag = '1' or Zeroflag = '1')));
+		     stopbit <= "11";
+        elsif (NumS = "00") then
+		  
+            if ((IR_STAGE_3(15 downto 12) = "0100" and ((S1I2 = DI3) or (S2I2 = DI3)) then 
+				   stopbit <= "01";
+                output_vector = "---------"; -- REG_a has issue which has to resolved using 
+            else 
+				   stopbit <= "00";
+				   if(S1I2 = DI3) then
+					  HazardBitsA = "01";
+					elsif(S1I2 = DI4) then
+				     HazardBitsA = "10";
+					else
+				       HazardBitsA = "00";
+					end if;
+					  
+					if(S2I2 = DI3) then
+					  HazardBitsB = "01";
+					elsif(S2I2 = DI4) then
+				     HazardBitsB = "10";
+					else
+				       HazardBitsB = "00";
+					end if;
+				end if;
+
+        elsif (NumS = "01")  then
+            if (IR_STAGE_3(15 downto 12) = "0100" and S1I2 = DI3)   then
+				 stopbit <= "01";
+            else
+				     stopbit <= "00";
+				    HazardBitsB <= "00";
+                if (S1I2 = DI3) then
+					  HazardBitsA <= "01";
+					 elsif(S1I2 = DI4) then
+					  HazardBitsA <= "10";
+					 else 
+					     HazardBitsA = "00"
+                end if;
+				end if;
+		  elsif (NumS = "10")  then
+            if (IR_STAGE_3(15 downto 12) = "0100" and S2I2 = DI3)  then
+                stopbit <= "01";  
+            else
+				     stopbit <= "00";
+                HazarBitsA <= "00";
+					 if(S2I2 = DI3) then
+					  HazardBitsB <= "01";
+					 elsif(S2I2 = DI4) then;
+					  HazardBitsB <= "10";
+					 else
+					     HazardBitsB <= "00";
+            end if;
+		  else
+		      HazardBitsA <= "00"
+				HazardBitsB <= "00";
+		  end if;	
+    end architecture bhv;

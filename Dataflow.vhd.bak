@@ -1,0 +1,31 @@
+Library ieee;
+use ieee.std_logic_1164.all;
+library work;
+use work.Gates.all;
+
+entity Dataflow is 
+  port (PCin :in std_logic_vector( 15 downto 0); clock: in std_logic;
+       IR6o: out std_logic_vector(15 downto 0));
+end entity Dataflow ;
+
+signal IR2, IR3, IR4, IR5, IR6, PC2, PC3, PC4, PC5, PC6: std_logic_vector(15 downto 0);
+signal RF_A1,RF_A2,RF_A3, RF_D3, SelALU_A, SelALU_B, DI4, DI5: std_logic_vector(2 downto 0);
+signal NumS, CZforALU2: std_logic_vector(1 downto 0);
+signal inp2SMLM, SEinp, ComplimentbitALU2, ALU3inp, DMemWr, DMemor3Out: std_logic;
+
+architecture Struct of Dataflow is
+
+begin
+one:Memory port map(M_add => PCin, M_inp => "0000000000000000", M_data => IR2, clock => clock, Mem_R => '1', Mem_W => '0');
+one0:TempRegister port map(A => PCin, clock => clock, reset => '0', Q => PC2);
+two:TempRegister port map(A => IR2, clock => clock, reset => '0', Q => IR3);
+two0:TempRegister port map(A => PC2, clock => clock, reset => '0', Q => PC3);
+three:Dec3 port map(PCin => PC3, IRin => IR3, SMLMinp => '0', Wr => '1', clock => clock, IRout => IR4, 
+                    PCout => PC4, A1 => RF_A1, A2 => RF_A2, 
+						  bit2denotenumberofsources => NumS, SMLMUnit => inp2SMLM)
+four: Dec4 port map(PCin => PC4, IRin => IR4, Wr => '1', clock => '1', HazardBitsA => "00", HazardBitsB => "00", 
+                    IRout => IR5, PCout => PC5, SelALU_A => SelALU_A, SelALU_B => SelALU_B, 
+						  Destin => DI4, CZ => CZforALU2, SEbit => SEinp, Cb => ComplimentbitALU2, ALU3inp => ALU3inp);
+five: Dec5 port map(PCin => PC5, IRin => IR5, Wr => '1', clock => clock, Destin => DI5, IRout => IR6, PCout => PC6, WrMe => DMemWr, Sel => DMemor3Out);
+six: IR6o <= IR6;
+end Struct;

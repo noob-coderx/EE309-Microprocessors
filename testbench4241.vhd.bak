@@ -1,0 +1,25 @@
+library std;
+use std.textio.all;
+
+library ieee;
+use ieee.std_logic_1164.all;
+
+entity testbench4241 is
+end entity;
+architecture struc of testbench4241 is
+
+component IITB_CPU is
+port(clck : in std_logic; reset: in std_logic; stop: in std_logic;
+	 output_dummy: out std_logic);
+end component IITB_CPU;
+
+signal clk50: std_logic :='1';
+signal rst: std_logic:='0';
+signal st: std_logic:='0';
+signal clkout: std_logic;
+constant clkper:time:= 20 ns;
+begin
+p: IITB_CPU port map(clck => clk50, reset => rst, stop => st,output_dummy => clkout);
+   clk50 <= not clk50 after clkper/2;
+	st <= not st after 4000 ns;
+end struc;

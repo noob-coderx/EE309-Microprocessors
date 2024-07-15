@@ -1,0 +1,42 @@
+library ieee;
+use ieee.std_logic_1164.all;
+use ieee.numeric_std.all;
+
+entity Writer is
+    port(
+		    stopbit: in std_logic_vector(1 downto 0)
+          PClineSelector, PCWr, IR2Wr, IR3Wr, stage2Bubble, stage3Bubble, stage4Bubble : out std_logic;
+        );
+end entity Writer;
+
+architecture bhv of Writer is
+
+    begin
+        alu_proc: process(IR_STAGE_2, IR_STAGE_3, IR_STAGE_4, IR_STAGE_5)
+    begin
+        if(stopbit = "11") then
+		    PClineSelector = '1';
+			 PCWr = '1';
+			 IR2Wr = '1';
+			 IR3Wr = '1';
+			 stage2Bubble = '1';
+			 stage3Bubble = '1';
+			 stage4Bubble = '1';
+			elsif(stopbit = "01") then
+			 PClineSelector = '0';
+			 PCWr = '0';
+			 IR2Wr = '0';
+			 IR3Wr = '0';
+			 stage4Bubble = '1';
+			 stage2Bubble = '0';
+			 stage3Bubble = '0';
+			else
+			 PClineSelector = '0';
+			 PCWr = '1';
+			 IR2Wr = '1';
+			 IR3Wr = '1';
+			 stage2Bubble = '0';
+			 stage3Bubble = '0';
+			 stage4Bubble = '0';
+	
+    end architecture bhv;
